@@ -1,0 +1,35 @@
+[
+  {
+    "id": "community-hans",
+    "language": "hans",
+    "category": "每日规划",
+    "title": "每日待办",
+    "outlines": [
+      {
+        "text": "☐ 完成今天最重要的一件事\n☐ 留一点时间整理想法"
+      }
+    ]
+  },
+  {
+    "id": "community-hant",
+    "language": "hant",
+    "category": "每日規劃",
+    "title": "每日待辦",
+    "outlines": [
+      {
+        "text": "☐ 完成今天最重要的一件事\n☐ 留一點時間整理想法"
+      }
+    ]
+  },
+  {
+    "id": "community-en",
+    "language": "en",
+    "category": "Daily plan",
+    "title": "Daily checklist",
+    "outlines": [
+      {
+        "text": "☐ Finish one important task\n☐ Make time to reflect"
+      }
+    ]
+  }
+]
