@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp" android:background="@drawable/widget_quick_background" android:contentDescription="@string/widget_quick_description">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/widget_quick_title" android:textSize="22sp" android:textStyle="bold" android:textColor="#383838" android:maxLines="1" android:ellipsize="end" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/widget_quick_hint" android:textSize="13sp" android:textColor="#A6A6A6" android:maxLines="1" android:ellipsize="end" android:paddingTop="5dp" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <ImageView android:layout_gravity="bottom|start" android:id="@+id/widget_art" android:layout_width="56dp" android:layout_height="46dp" android:scaleType="fitCenter" android:importantForAccessibility="no" />
+        <TextView android:layout_gravity="bottom|end" android:id="@+id/widget_add" android:layout_width="44dp" android:layout_height="44dp" android:gravity="center" android:text="@string/widget_add_symbol" android:textSize="38sp" android:textStyle="bold" android:textColor="#6D9DE4" android:background="@drawable/widget_add_background" android:contentDescription="@string/widget_add_note" />
+    </FrameLayout>
+</LinearLayout>

@@ -10,12 +10,18 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/** Reads the original packaged blueprint runs; Android display is an explicit adapter. */
+/** Self-authored packaged templates and private user snapshots share one display adapter. */
 public final class TemplateLibrary {
     public static JSONArray load(Context context)throws IOException,JSONException{
         try(InputStream in=context.getAssets().open("templates.json")){ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);return new JSONArray(out.toString("UTF-8"));}
     }
+    public static JSONArray loadWithCustom(Context context)throws IOException,JSONException{
+        JSONArray all=load(context),custom=CustomTemplateStore.load(context);
+        for(int i=0;i<custom.length();i++)all.put(custom.getJSONObject(i));return all;
+    }
     public static SpannableStringBuilder render(JSONObject outline){
+        if(outline==null)return new SpannableStringBuilder();
+        if(outline.has("rich"))return new SpannableStringBuilder(RichText.decode(outline.optString("rich"),outline.optString("text")));
         SpannableStringBuilder result=new SpannableStringBuilder();JSONArray runs=outline.optJSONArray("runs");if(runs==null)return result.append(outline.optString("text"));
         Set<String> groups=new HashSet<>();
         for(int k=0;k<runs.length();k++){JSONObject run=runs.optJSONObject(k);if(run==null)continue;

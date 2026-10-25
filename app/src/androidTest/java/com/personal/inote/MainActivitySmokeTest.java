@@ -76,7 +76,7 @@ public class MainActivitySmokeTest extends TestCase {
         onMain("finish activity for persistence restart",()->activity.finish());getInstrumentation().waitForIdleSync();setActivity(null);activity=getActivity();getInstrumentation().waitForIdleSync();
         assertText(title);clickText(title);assertText("First captured idea");assertText("Second appended idea");
         clickText("First captured idea");assertText("编辑小笔记");setTopEditor("写下你的灵感…","Updated captured idea");clickText("保存");assertText("Updated captured idea");
-        clickText(title);clickText("移入回收本");
+        clickText("笔记菜单");clickText("删除笔记");clickText("删除");
         try(NoteStore store=new NoteStore(getInstrumentation().getTargetContext())){assertEquals(1,store.listNotes("trash",title,0).size());}
         clickText("筛选与排序");clickText("回收本");clickText(title);clickText("恢复笔记");assertText("Updated captured idea");
         clickText("‹ 返回");clickText("我的");assertText(originalDark?"切换深色主题":"切换浅色主题");
@@ -96,13 +96,12 @@ public class MainActivitySmokeTest extends TestCase {
         clickText("新建笔记");clickText("从模板创建");
         // Keep this compatible with the transitional dialog picker and the new
         // full-screen community template picker.
-        final boolean[] oldPicker={false};onMain("inspect template picker",()->oldPicker[0]=topText("简体中文 · 54 个")!=null);
-        if(oldPicker[0]){clickText("简体中文 · 54 个");clickText("每日规划 · 7");}else clickText("模板分类：每日规划");
+        clickText("模板分类：每日规划");
         screenshot("05-template-picker.png");clickText("每日待办");clickText("创建笔记");
         NoteStore.Note created=null;
         try(NoteStore store=new NoteStore(getInstrumentation().getTargetContext())){for(NoteStore.Note n:store.listNotes("all","每日待办",0))if(!before.contains(n.id)){createdNoteIds.add(n.id);created=n;}}
         assertNotNull("Community template did not create a note",created);assertFalse("Template has no records",created.records.isEmpty());assertTrue("Template did not retain book membership",created.bookIds.containsAll(createdBookIds));
-        assertText("每日待办");screenshot("02-template-detail.png");
+        assertText("每日待办");screenshot("02-template-detail.png");clickText("笔记菜单");screenshot("08-note-menu.png");clickText("导出笔记");screenshot("09-export-menu.png");clickText("取消");
         clickText(created.records.get(0).text);assertText("编辑小笔记");clickText("文本格式");assertText("高亮");screenshot("03-template-editor.png");clickText("保存");
         clickText("‹ 返回");clickText("所有笔记");assertText("每日待办");screenshot("01-home-template.png");
         clickText("笔记本");assertText(bookName);screenshot("04-bookshelf.png");

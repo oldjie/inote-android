@@ -16,7 +16,7 @@ public final class PersonalTestRunner extends Instrumentation {
         Bundle output=new Bundle();StringBuilder log=new StringBuilder();
         try{
             TestSuite suite=new TestSuite("Personal iNote");
-            Class<?>[] available={NoteStoreTest.class,MainActivitySmokeTest.class,NoteExporterTest.class,OriginalInoteImporterTest.class,RichTextSecurityTest.class};
+            Class<?>[] available={NoteStoreTest.class,MainActivitySmokeTest.class,NoteExporterTest.class,OriginalInoteImporterTest.class,RichTextSecurityTest.class,CustomTemplateStoreTest.class,NoteWidgetTest.class,DrawingPadTest.class};
             String selected=arguments.getString("class","");
             for(Class<?> type:available){
                 if(selected.isEmpty()){suite.addTestSuite(type.asSubclass(TestCase.class));continue;}

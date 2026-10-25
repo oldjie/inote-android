@@ -16,7 +16,7 @@ import org.json.*;
 import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 
-/** Paper-thumbnail browser based on the packaged template guide. */
+/** Paper-thumbnail browser, including private user-created text templates. */
 public final class TemplatePicker {
     public static void show(Activity activity,boolean dark,Consumer<JSONObject> selected){
         try{new TemplatePicker(activity,dark,selected).render();}catch(Exception e){Toast.makeText(activity,"无法加载模板："+e.getMessage(),Toast.LENGTH_LONG).show();}
@@ -24,11 +24,11 @@ public final class TemplatePicker {
     private final Activity activity;
     private final boolean dark;
     private final Consumer<JSONObject> selected;
-    private final JSONArray templates;
+    private JSONArray templates;
     private final Dialog dialog;
     private String language="hans",category="全部";
     private TemplatePicker(Activity a,boolean d,Consumer<JSONObject> callback)throws Exception{
-        activity=a;dark=d;selected=callback;templates=TemplateLibrary.load(a);dialog=new Dialog(a,android.R.style.Theme_Material_Light_NoActionBar);
+        activity=a;dark=d;selected=callback;templates=TemplateLibrary.loadWithCustom(a);dialog=new Dialog(a,android.R.style.Theme_Material_Light_NoActionBar);
     }
     private int dp(float value){return Math.round(value*activity.getResources().getDisplayMetrics().density);}
     private LinearLayout column(){LinearLayout v=new LinearLayout(activity);v.setOrientation(LinearLayout.VERTICAL);return v;}
@@ -50,7 +50,8 @@ public final class TemplatePicker {
             TextView name=label(t.optString("title"),13,ink);name.setTypeface(null,Typeface.BOLD);name.setSingleLine(true);name.setEllipsize(TextUtils.TruncateAt.END);card.addView(name);
             SpannableStringBuilder body=new SpannableStringBuilder();JSONArray outlines=t.optJSONArray("outlines");if(outlines!=null)for(int j=0;j<outlines.length();j++){if(j>0)body.append("\n\n");body.append(TemplateLibrary.render(outlines.optJSONObject(j)));}
             LinedTextView preview=new LinedTextView(activity);preview.setTextSize(12);preview.setTextColor(ink);preview.setDarkMode(dark);PaperChecks.apply(body);preview.setText(body);preview.setLineSpacing(dp(3),1);preview.setMaxLines(9);preview.setEllipsize(TextUtils.TruncateAt.END);preview.setPadding(0,dp(8),0,0);card.addView(preview,new LinearLayout.LayoutParams(-1,dp(166)));
-            TextView kind=label(t.optString("category"),10,muted);kind.setPadding(0,dp(8),0,0);card.addView(kind);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.bottomMargin=dp(10);sides[index++%2].addView(card,p);card.setOnClickListener(v->{dialog.dismiss();selected.accept(t);});
+            TextView kind=label(t.optString("category")+(t.optBoolean("custom")?" · 长按删除":""),10,muted);kind.setPadding(0,dp(8),0,0);card.addView(kind);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.bottomMargin=dp(10);sides[index++%2].addView(card,p);card.setOnClickListener(v->{dialog.dismiss();selected.accept(t);});
+            if(t.optBoolean("custom"))card.setOnLongClickListener(v->{new AlertDialog.Builder(activity).setTitle("删除自定义模板").setMessage("只删除模板，不会删除原笔记。").setNegativeButton("取消",null).setPositiveButton("删除",(d,w)->{try{CustomTemplateStore.delete(activity,t.optString("id"));templates=TemplateLibrary.loadWithCustom(activity);render();}catch(Exception e){Toast.makeText(activity,"删除失败",Toast.LENGTH_SHORT).show();}}).show();return true;});
         }
         scroll.addView(columns);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));dialog.setContentView(root);dialog.show();dialog.getWindow().setLayout(-1,-1);dialog.getWindow().setStatusBarColor(bg);dialog.getWindow().setNavigationBarColor(bg);dialog.getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         if(android.os.Build.VERSION.SDK_INT>=35){root.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets b=insets.getInsets(WindowInsets.Type.systemBars());v.setPadding(b.left,b.top,b.right,b.bottom);return insets;});root.requestApplyInsets();}

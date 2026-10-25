@@ -152,16 +152,38 @@ public class NoteStoreTest extends AndroidTestCase {
         android.text.style.StrikethroughSpan strike=output.getSpans(0,output.length(),android.text.style.StrikethroughSpan.class)[0];assertEquals(20,output.getSpanStart(strike));assertEquals(26,output.getSpanEnd(strike));
     }
     public void testCommunityTemplatesRenderAndRoundTrip() throws Exception {
-        org.json.JSONArray all=TemplateLibrary.load(getContext());assertEquals(3,all.length());int hans=0,hant=0,en=0;
+        org.json.JSONArray all=TemplateLibrary.load(getContext());assertEquals(56,all.length());int hans=0,hant=0,en=0;
         for(int i=0;i<all.length();i++){
             JSONObject item=all.getJSONObject(i);String language=item.getString("language");if(language.equals("hans"))hans++;else if(language.equals("hant"))hant++;else if(language.equals("en"))en++;else fail("Unexpected template language");
             org.json.JSONArray outlines=item.getJSONArray("outlines");assertTrue(outlines.length()>0);
             for(int j=0;j<outlines.length();j++){android.text.SpannableStringBuilder rendered=TemplateLibrary.render(outlines.getJSONObject(j));assertEquals(rendered.toString(),RichText.decode(RichText.encode(rendered),"").toString());}
         }
-        assertEquals(1,hans);assertEquals(1,hant);assertEquals(1,en);
+        assertEquals(54,hans);assertEquals(1,hant);assertEquals(1,en);
     }
     public void testBookCoverPersistsAndBacksUp() {
         NoteStore.Book b=store.createBook("cover");store.setBookCover(b.id,"cover-01.png");store.close();store=new NoteStore(isolated);assertEquals("cover-01.png",store.listBooks().get(0).cover);
         store.importJson(store.exportJson());assertEquals(2,store.listBooks().size());assertEquals("cover-01.png",store.listBooks().get(1).cover);
+    }
+    public void testSingleNoteExportExcludesOtherPrivateContent()throws Exception {
+        NoteStore.Note wanted=store.createNote("wanted"),privateNote=store.createNote("private");
+        store.addRecord(wanted.id,"share this");store.addRecord(privateNote.id,"private body");
+        NoteStore.Book one=store.createBook("public book"),two=store.createBook("private book");
+        store.setNoteBooks(wanted.id,Arrays.asList(one.id));store.setNoteBooks(privateNote.id,Arrays.asList(two.id));
+        String export=store.exportNoteJson(wanted.id);assertFalse(export.contains("private body"));assertFalse(export.contains("private book"));
+        JSONObject json=new JSONObject(export);assertEquals(1,json.getJSONArray("notes").length());assertEquals(1,json.getJSONArray("books").length());
+        store.importJson(export);assertEquals(2,store.listNotes("all","wanted",0).size());
+    }
+    public void testCopyAndAtomicSelectionDeletion()throws Exception {
+        NoteStore.Note n=store.createNote("copy source"),outside=store.createNote("outside");
+        NoteStore.Record a=store.addRecord(n.id,"one"),b=store.addRecord(n.id,"two"),other=store.addRecord(outside.id,"untouched");
+        a.html="<b>one</b>";a.done=true;a.todo=true;store.saveRecord(a);
+        long copied=store.duplicateNote(n.id);assertEquals(2,store.getNote(copied).records.size());assertEquals("<b>one</b>",store.getNote(copied).records.get(0).html);
+        try{store.deleteRecords(n.id,Arrays.asList(a.id,other.id));fail("Cross-note selection accepted");}catch(IllegalArgumentException expected){}
+        assertEquals(2,store.getNote(n.id).records.size());store.deleteRecords(n.id,Arrays.asList(a.id,b.id));assertTrue(store.getNote(n.id).records.isEmpty());assertEquals(2,store.getNote(copied).records.size());
+    }
+    public void testCopyPreservesNewestFirstOrder(){
+        NoteStore.Note n=store.createNote("newest");n.sortOrder="newest";store.saveNote(n);
+        NoteStore.Record a=store.addRecord(n.id,"older"),b=store.addRecord(n.id,"newer");a.createdAt=100;b.createdAt=200;store.saveRecord(a);store.saveRecord(b);
+        NoteStore.Note copy=store.getNote(store.duplicateNote(n.id));assertEquals("newer",copy.records.get(0).text);assertEquals("older",copy.records.get(1).text);
     }
 }

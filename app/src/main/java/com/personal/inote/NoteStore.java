@@ -45,9 +45,11 @@ public final class NoteStore extends SQLiteOpenHelper {
         public int level;
     }
     private final File filesDir;
+    private final Context appContext;
+    private void changed(){if(!getWritableDatabase().inTransaction())WidgetSupport.refreshAll(appContext);}
     public NoteStore(Context context) {
         super(context.getApplicationContext(), "inote.db", null, 4);
-        filesDir = context.getApplicationContext().getFilesDir();
+        appContext=context.getApplicationContext();filesDir = appContext.getFilesDir();
     }
     @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
     @Override public void onCreate(SQLiteDatabase db) {
@@ -77,7 +79,7 @@ public final class NoteStore extends SQLiteOpenHelper {
     }
     public Note createNote(String title) {
         Note n = new Note(); n.title = safe(title); n.createdAt = n.updatedAt = System.currentTimeMillis();
-        n.id = getWritableDatabase().insertOrThrow("notes", null, noteValues(n)); return n;
+        n.id = getWritableDatabase().insertOrThrow("notes", null, noteValues(n)); changed();return n;
     }
     public void saveNote(Note n) {
         SQLiteDatabase db = getWritableDatabase(); db.beginTransaction();
@@ -88,7 +90,7 @@ public final class NoteStore extends SQLiteOpenHelper {
             n.updatedAt = System.currentTimeMillis();
             if (db.update("notes", noteValues(n), "id=?", args(n.id)) != 1) throw new IllegalArgumentException("Note not found");
             replaceBooks(db, n.id, n.bookIds); db.setTransactionSuccessful();
-        } finally { db.endTransaction(); }
+        } finally { db.endTransaction(); }changed();
     }
     public Note getNote(long id) {
         try (Cursor c = getReadableDatabase().rawQuery("SELECT * FROM notes WHERE id=?", args(id))) {
@@ -132,7 +134,7 @@ public final class NoteStore extends SQLiteOpenHelper {
     public Record addRecord(long noteId, String text) {
         requireEditable(noteId); Record r = new Record(); r.noteId=noteId; r.text=safe(text); r.createdAt=r.updatedAt=System.currentTimeMillis();
         SQLiteDatabase db=getWritableDatabase(); db.beginTransaction();
-        try { r.id=db.insertOrThrow("records",null,recordValues(r)); touch(db,noteId); db.setTransactionSuccessful(); } finally { db.endTransaction(); } return r;
+        try { r.id=db.insertOrThrow("records",null,recordValues(r)); touch(db,noteId); db.setTransactionSuccessful(); } finally { db.endTransaction(); }changed();return r;
     }
     public void saveRecord(Record r) {
         validateImages(r.images);
@@ -141,7 +143,7 @@ public final class NoteStore extends SQLiteOpenHelper {
             if(db.update("records",recordValues(r),"id=? AND note_id=?",new String[]{""+r.id,""+r.noteId})!=1) throw new IllegalArgumentException("Record not found");
             touch(db,r.noteId); db.setTransactionSuccessful();
         } finally { db.endTransaction(); }
-        cleanupUnreferencedImages();
+        cleanupUnreferencedImages();changed();
     }
     public void deleteRecord(long id) {
         SQLiteDatabase db=getWritableDatabase();
@@ -149,7 +151,7 @@ public final class NoteStore extends SQLiteOpenHelper {
             if(!c.moveToFirst()) return; long noteId=c.getLong(0); requireEditable(noteId); db.beginTransaction();
             try { db.delete("records","id=?",args(id)); touch(db,noteId); db.setTransactionSuccessful(); } finally { db.endTransaction(); }
         }
-        cleanupUnreferencedImages();
+        cleanupUnreferencedImages();changed();
     }
     private void requireEditable(long id) {
         try(Cursor c=getReadableDatabase().rawQuery("SELECT readonly,deleted FROM notes WHERE id=?",args(id))) {
@@ -157,8 +159,8 @@ public final class NoteStore extends SQLiteOpenHelper {
             if(c.getInt(0)!=0 || c.getInt(1)!=0) throw new IllegalStateException("Note is read only or in trash");
         }
     }
-    public void restoreNote(long id) { ContentValues v=new ContentValues(); v.put("deleted",0); v.put("updated",System.currentTimeMillis()); getWritableDatabase().update("notes",v,"id=?",args(id)); }
-    public void purgeNote(long id) { getWritableDatabase().delete("notes","id=? AND deleted=1",args(id)); cleanupUnreferencedImages(); }
+    public void restoreNote(long id) { ContentValues v=new ContentValues(); v.put("deleted",0); v.put("updated",System.currentTimeMillis()); getWritableDatabase().update("notes",v,"id=?",args(id));changed(); }
+    public void purgeNote(long id) { getWritableDatabase().delete("notes","id=? AND deleted=1",args(id)); cleanupUnreferencedImages();changed(); }
     public List<Book> listBooks() {
         List<Book> books=new ArrayList<>();
         try(Cursor c=getReadableDatabase().rawQuery("SELECT * FROM books ORDER BY created,id",null)) {
@@ -172,7 +174,7 @@ public final class NoteStore extends SQLiteOpenHelper {
     public void setBookIcon(long id,String icon){ContentValues v=new ContentValues();v.put("icon",safe(icon));getWritableDatabase().update("books",v,"id=?",args(id));}
     public void setNoteBooks(long id,List<Long> bookIds) {
         SQLiteDatabase db=getWritableDatabase(); db.beginTransaction();
-        try { replaceBooks(db,id,bookIds); touch(db,id); db.setTransactionSuccessful(); } finally { db.endTransaction(); }
+        try { replaceBooks(db,id,bookIds); touch(db,id); db.setTransactionSuccessful(); } finally { db.endTransaction(); }changed();
     }
     private void replaceBooks(SQLiteDatabase db,long id,List<Long> bookIds) {
         db.delete("note_books","note_id=?",args(id));
@@ -245,13 +247,36 @@ public final class NoteStore extends SQLiteOpenHelper {
     private static String str(Cursor c,String key) { return c.getString(c.getColumnIndexOrThrow(key)); }
     private static boolean flag(Cursor c,String key) { return number(c,key)!=0; }
 
+    /** Copies a note atomically. Attachments are shared until the last reference is removed. */
+    public long duplicateNote(long id) {
+        Note source=getNote(id);if(source==null||source.deleted)throw new IllegalArgumentException("Note not found");
+        SQLiteDatabase db=getWritableDatabase();db.beginTransaction();
+        try {
+            Note copy=createNote(source.title.isEmpty()?"副本":source.title+" · 副本");
+            copy.color=source.color;copy.starred=source.starred;copy.sortOrder=source.sortOrder;copy.bookIds.addAll(source.bookIds);saveNote(copy);
+            List<Record> originals=new ArrayList<>(source.records);if("newest".equals(source.sortOrder))java.util.Collections.reverse(originals);
+            for(Record original:originals){Record r=addRecord(copy.id,original.text);r.createdAt=original.createdAt;r.html=original.html;r.todo=original.todo;r.done=original.done;r.colorType=original.colorType;r.folded=original.folded;r.images.addAll(original.images);saveRecord(r);}
+            db.setTransactionSuccessful();return copy.id;
+        } finally {db.endTransaction();changed();}
+    }
+    /** Validates membership before a single atomic multi-delete. */
+    public void deleteRecords(long noteId,List<Long> ids) {
+        requireEditable(noteId);SQLiteDatabase db=getWritableDatabase();db.beginTransaction();
+        try {for(long id:ids){try(Cursor c=db.rawQuery("SELECT note_id FROM records WHERE id=?",args(id))){if(!c.moveToFirst()||c.getLong(0)!=noteId)throw new IllegalArgumentException("Record does not belong to note");}}
+            for(long id:ids)db.delete("records","id=?",args(id));touch(db,noteId);db.setTransactionSuccessful();
+        } finally {db.endTransaction();}cleanupUnreferencedImages();changed();
+    }
+    public String exportNoteJson(long noteId) {if(getNote(noteId)==null)throw new IllegalArgumentException("Note not found");return exportJson(noteId);}
     /** Self-contained backup, including attachment bytes; excludes external/unreadable paths. */
-    public String exportJson() {
+    public String exportJson() {return exportJson(0);}
+    private String exportJson(long selectedNoteId) {
         try {
             JSONObject root=new JSONObject().put("format","personal-inote").put("version",2);
             JSONArray books=new JSONArray(),notes=new JSONArray(); JSONObject assets=new JSONObject();long attachmentBytes=0;
-            for(Book b:listBooks()) books.put(new JSONObject().put("id",b.id).put("name",b.name).put("color",b.color).put("cover",b.cover).put("icon",b.icon).put("created",b.createdAt));
-            for(Note n:queryNotes("SELECT * FROM notes ORDER BY id",null)) {
+            List<Note> selected=selectedNoteId==0?queryNotes("SELECT * FROM notes ORDER BY id",null):queryNotes("SELECT * FROM notes WHERE id=?",args(selectedNoteId));
+            Set<Long> memberships=new HashSet<>();for(Note n:selected)memberships.addAll(n.bookIds);
+            for(Book b:listBooks()) {if(selectedNoteId!=0&&!memberships.contains(b.id))continue;books.put(new JSONObject().put("id",b.id).put("name",b.name).put("color",b.color).put("cover",b.cover).put("icon",b.icon).put("created",b.createdAt));}
+            for(Note n:selected) {
                 JSONObject j=new JSONObject().put("id",n.id).put("title",n.title).put("color",n.color).put("created",n.createdAt).put("updated",n.updatedAt)
                     .put("pinned",n.pinned).put("starred",n.starred).put("archived",n.archived).put("deleted",n.deleted).put("readonly",n.readOnly)
                     .put("review_at",n.reviewAt).put("review_level",n.reviewLevel).put("books",new JSONArray(n.bookIds)).put("folded",n.folded).put("sort_order",n.sortOrder);
@@ -269,7 +294,7 @@ public final class NoteStore extends SQLiteOpenHelper {
                 }
                 j.put("records",records);notes.put(j);
             }
-            JSONArray cards=new JSONArray();try(Cursor c=getReadableDatabase().rawQuery("SELECT * FROM flashcards ORDER BY id",null)){while(c.moveToNext()){Flashcard f=readFlashcard(c);cards.put(new JSONObject().put("id",f.id).put("note_id",f.noteId).put("front_record",f.frontRecordId).put("back_record",f.backRecordId).put("due_at",f.dueAt).put("level",f.level));}}
+            JSONArray cards=new JSONArray();try(Cursor c=getReadableDatabase().rawQuery(selectedNoteId==0?"SELECT * FROM flashcards ORDER BY id":"SELECT * FROM flashcards WHERE note_id=? ORDER BY id",selectedNoteId==0?null:args(selectedNoteId))){while(c.moveToNext()){Flashcard f=readFlashcard(c);cards.put(new JSONObject().put("id",f.id).put("note_id",f.noteId).put("front_record",f.frontRecordId).put("back_record",f.backRecordId).put("due_at",f.dueAt).put("level",f.level));}}
             String result=root.put("books",books).put("notes",notes).put("assets",assets).put("flashcards",cards).toString(2);
             if(result.length()>100*1024*1024)throw new IOException("Backup exceeds 100 MB limit");return result;
         } catch(JSONException|IOException e) { throw new IllegalStateException("Backup export failed",e); }
@@ -326,7 +351,7 @@ public final class NoteStore extends SQLiteOpenHelper {
                 for(Flashcard f:cards){f.noteId=mappedNotes.get(f.noteId);f.frontRecordId=mappedRecords.get(f.frontRecordId);f.backRecordId=mappedRecords.get(f.backRecordId);db.insertOrThrow("flashcards",null,flashValues(f));}
                 db.setTransactionSuccessful();
             } finally { db.endTransaction(); }
-            committed=true;
+            committed=true;changed();
         } catch(JSONException|IOException|IllegalArgumentException e) { throw new IllegalArgumentException("Invalid backup; existing notes preserved",e); }
         finally { if(!committed)for(File file:written)file.delete(); }
     }

@@ -4,7 +4,7 @@
 
 用多条小笔记串起一个主题，把文字、清单和图片收进笔记本，再按自己的节奏整理与回顾。支持 Android 8.0 及以上，使用 Java 和 Android 原生界面实现。
 
-> 这是受 iOS iNote 使用方式启发的独立 Android 实现，与 iNote 原开发者无隶属、合作或授权关系，也不是其官方移植。公开版不包含原版 IPA、提取图标、封面、字体或模板；使用独立绘制的图标、封面和三个自编示例模板。因此，公开版并非原版 UI 的逐像素复刻。
+> 这是受 iOS iNote 使用方式启发的独立 Android 实现，与 iNote 原开发者无隶属、合作或授权关系，也不是其官方移植。公开版不包含原版 IPA、提取图标、封面、字体或模板；使用独立绘制的图标、封面与自编模板。0.3 版本依据实际界面截图进一步对齐布局，但不宣称逐像素相同。
 
 ## 界面预览
 
@@ -16,6 +16,17 @@
   <img src="docs/images/books.png" width="30%" alt="笔记本书架" />
 </p>
 
+<p>
+  <img src="docs/images/detail.png" width="30%" alt="独立日期栏和横线小笔记" />
+  <img src="docs/images/note-menu.png" width="30%" alt="底部笔记操作面板" />
+  <img src="docs/images/export.png" width="30%" alt="图片主题与署名预览" />
+</p>
+
+<p>
+  <img src="docs/images/note-widget.png" width="60%" alt="实际 AppWidgetHost 渲染的天空笔记便签" />
+  <img src="docs/images/quick-widget.png" width="28%" alt="桌面快捷记录小组件" />
+</p>
+
 ## 可以做什么
 
 | 功能 | 说明 |
@@ -23,13 +34,16 @@
 | 多段笔记 | 一篇笔记容纳多条记录，逐条编辑、折叠和整理 |
 | 富文本 | 粗体、斜体、下划线、删除线、高亮、等宽字、列表与引用 |
 | 图片与待办 | 添加本地图片，使用清单记录和勾选任务 |
+| 手写 | 黑、蓝、红画笔，撤销与清空，保存为笔记图片 |
 | 笔记本 | 笔记可归入多个笔记本，支持封面和图标选择 |
 | 查找整理 | 搜索、置顶、星标、颜色、归档与回收站 |
 | 阅读外观 | 纸张横线、卡片列表、浅色与深色主题 |
-| 模板 | 简体中文、繁体中文、英文各一个每日待办示例 |
+| 模板 | 54 份自编简体模板，繁体及英文各 1 份；可将文字笔记保存为个人模板 |
+| 万能戳 | 插入日期、时间、数学符号和分割线 |
+| 桌面小组件 | 2×2 快捷记录、可调整大小的笔记便签，纸张／木纹／天空外观和大字标语 |
 | 记忆卡片 | 将记录组成问答卡片，按本项目的复习间隔回顾 |
 | 本地备份 | 导出 JSON，导入时合并笔记、图片和关联信息 |
-| 分享输出 | 将单篇笔记导出为 PNG 或 PDF |
+| 分享输出 | PNG 五种图片主题、署名／日期／字号预览；PDF、TXT、复制文本与单篇 JSON |
 
 不包含云同步、账号系统、密码锁、广告或统计 SDK。记忆复习规则为本项目实现，不宣称与 iOS 原版算法一致。
 
@@ -40,6 +54,12 @@
 **卸载前请导出备份。** 应用数据保存在本机私有目录，卸载会删除。备份导入采用合并方式，重复导入可能产生重复内容；导入前建议先备份现有数据。
 
 当前仓库提供源代码，不附带签名发布包。自行构建的 Debug APK 仅用于开发与个人测试。
+
+### 鸿蒙 4.2 桌面小组件
+
+安装并打开应用后，在桌面双指捏合，进入「服务卡片」，滑到底部选择「窗口小工具」，找到灵感笔记。选择快捷记录，或添加笔记便签后指定内容和外观。长按小组件可在桌面支持时调整大小。
+
+这是兼容 APK 系统的 **Android 窗口小工具**。已在 Android 模拟器验证实际绑定、配置、刷新及尺寸调整，**尚未在鸿蒙 4.2 真机验证**，不宣称支持 HarmonyOS NEXT。不同桌面版本入口可能不同，详见[小组件使用与验证说明](docs/WIDGETS.md)。
 
 ## 构建
 
@@ -75,7 +95,9 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 
 测试覆盖本地存储、富文本、备份合并与拒绝无效数据、图片生命周期、记忆卡片、导出以及界面基本操作。界面测试使用 Android 10+ 的窗口检查接口，请在 Android 10 或更新版本执行完整测试。测试数据会清理，但仍建议使用测试设备。
 
-发布前验证：公开版 `assembleDebug`、`assembleDebugAndroidTest` 和 `lintDebug` 通过；模拟器执行 **27 项测试全部通过**，包含危险链接协议回归检查。此结果不代表已覆盖全部 Android 设备。
+验证范围包含本地数据、导出隐私边界、模板、富文本危险协议、实际小组件绑定、配置、调整大小与更新。每个版本的检查结果和已知差异见[更新记录](CHANGELOG.md)，不代表覆盖全部 Android 设备。
+
+0.3.0 验证记录：构建及 Android Lint 通过；Android 12 模拟器 **42 项设备测试全部通过**。小组件测试包含实际点击打开指定笔记、快捷记录输入保存，以及拒绝伪造入口。
 
 ## 数据与隐私
 
@@ -84,6 +106,8 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 - 本地数据库和导出的 JSON **没有应用层加密**。导出文件由你选择保存位置，请自行保管。
 - 点击笔记中的网页或邮件链接可能打开外部应用；后续网络行为由该应用负责。导入富文本只保留 `http`、`https` 和 `mailto` 链接。
 - PNG / PDF 会包含选定笔记的可见内容；分享前请检查隐私信息。
+- 小组件将所选笔记摘要交给桌面程序显示；归档或移入回收站后会隐藏正文。
+- 自定义模板只保存文字与格式，目前不包含在笔记 JSON 备份中；有重要模板时请同时保留对应笔记。
 
 详见 [隐私说明](PRIVACY.md) 和 [安全说明](SECURITY.md)。这里的检查是源码审查与回归验证，不是独立第三方安全认证。
 
@@ -101,6 +125,9 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 - `TemplateLibrary.java` / `TemplatePicker.java`：模板渲染与选择。
 - `NoteExporter.java`：图片与 PDF 输出。
 - `CommunityIcon.java`：公开版独立绘制的图标与封面。
+- `PaperSheet.java` / `ExportStyleActivity.java`：底部操作面板与图片导出预览。
+- `WidgetSupport.java` / `NoteWidgetConfigActivity.java`：桌面小组件更新与配置。
+- `CustomTemplateStore.java`：应用私有目录中的自定义模板。
 - `app/src/androidTest`：设备端回归测试，使用生成数据，不含原版安装包样本。
 
 代码位于 `app/src/main/java/com/personal/inote`。欢迎提交问题与改进；问题报告请描述设备版本、复现步骤和期望行为，勿附真实笔记、密钥或未经脱敏的备份。

@@ -83,8 +83,8 @@ public final class LinedTextView extends TextView {
             // compound padding and its internal vertical offset. Use it instead
             // of assuming top gravity or a particular font's line height.
             float originY = getBaseline() - layout.getLineBaseline(0);
-            float left = getCompoundPaddingLeft() + extraInset;
-            float right = getWidth() - getCompoundPaddingRight() - extraInset;
+            float left = extraInset;
+            float right = getWidth() - extraInset;
             if (right > left && canvas.getClipBounds(clip)) {
                 int first = layout.getLineForVertical(
                         Math.max(0, (int) Math.floor(clip.top - originY)));
@@ -98,6 +98,8 @@ public final class LinedTextView extends TextView {
                     float y = originY + layout.getLineBottom(line) - halfStroke;
                     canvas.drawLine(left, y, right, y, rulePaint);
                 }
+                float step=layout.getLineBottom(0)-layout.getLineTop(0);
+                if(step>0)for(float y=originY+layout.getHeight()+step-halfStroke;y<getHeight();y+=step)canvas.drawLine(left,y,right,y,rulePaint);
             }
         }
         // Glyphs, highlighted spans, inline images and clickable checkbox spans

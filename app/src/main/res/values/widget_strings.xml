@@ -1,0 +1,14 @@
+<resources>
+    <string name="widget_note_title">灵感便签</string>
+    <string name="widget_options_symbol" translatable="false">•••</string>
+    <string name="widget_options">选择笔记与便签外观</string>
+    <string name="widget_select_note">选择一篇笔记</string>
+    <string name="widget_tap_note">轻点打开笔记</string>
+    <string name="widget_quick_description">快捷记录灵感</string>
+    <string name="widget_quick_title">记录灵感</string>
+    <string name="widget_quick_hint">你在思考什么？</string>
+    <string name="widget_add_symbol" translatable="false">+</string>
+    <string name="widget_add_note">新建笔记</string>
+    <string name="widget_selected_theme">%1$s ✓</string>
+    <string name="widget_read_only_title">%1$s · 只读</string>
+</resources>
