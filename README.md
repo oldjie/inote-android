@@ -20,30 +20,30 @@
 
 使用 Java 与 Android 原生界面实现，支持 Android 8.0 及以上。笔记、图片与草稿均保存在本机，无需账号或云同步。
 
-> 这是受 iOS iNote 使用方式启发的独立 Android 实现，与 iNote 原开发者无隶属、合作或授权关系，也不是其官方移植。公开版不包含原版 IPA、提取图标、封面、字体或模板；使用独立绘制的图标、封面与自编模板。0.3 版本依据实际界面截图进一步对齐布局，但不宣称逐像素相同。
+> 这是受 iOS iNote 使用方式启发的独立 Android 实现，与 iNote 原开发者无隶属、合作或授权关系，也不是其官方移植。公开版不包含原版 IPA、提取图标、封面、字体或模板；使用独立绘制的图标、封面与自编模板。
 
 ## 下载安装
 
-前往 [GitHub Releases](https://github.com/oldjie/inote-android/releases/latest) 下载 `inote-community-v0.3.1.apk`，安装前可对照同页 SHA-256 文件。此为公开社区版，与自用版包名不同。当前使用开发签名供体验，正式分发签名尚未建立。
+前往 [GitHub Releases](https://github.com/oldjie/inote-android/releases/latest) 下载 `inote-community-v0.3.1.apk`，安装前可对照同页 SHA-256 文件。此为公开社区版，与自用版包名不同。
 
 ## 界面预览
 
 <div align="center">
-  <img src="docs/images/home.png" width="29%" alt="纸张卡片笔记列表">
-  <img src="docs/images/editor.png" width="29%" alt="富文本与待办编辑">
-  <img src="docs/images/books.png" width="29%" alt="笔记本书架">
+  <img src="docs/images/home.png" width="24%" alt="纸张卡片笔记列表">
+  <img src="docs/images/editor.png" width="24%" alt="富文本与待办编辑">
+  <img src="docs/images/books.png" width="24%" alt="笔记本书架">
   <p><sub>笔记首页 · 富文本编辑 · 笔记本书架</sub></p>
-  <img src="docs/images/detail.png" width="29%" alt="独立日期栏和横线小笔记">
-  <img src="docs/images/note-menu.png" width="29%" alt="底部笔记操作面板">
-  <img src="docs/images/export.png" width="29%" alt="图片主题与署名预览">
+  <img src="docs/images/detail.png" width="24%" alt="独立日期栏和横线小笔记">
+  <img src="docs/images/note-menu.png" width="24%" alt="底部笔记操作面板">
+  <img src="docs/images/export.png" width="24%" alt="图片主题与署名预览">
   <p><sub>笔记详情 · 操作面板 · 图片导出</sub></p>
 </div>
 
 ### 桌面小组件
 
 <div align="center">
-  <img src="docs/images/note-widget.png" width="46%" alt="实际 AppWidgetHost 渲染的天空笔记便签">
-  <img src="docs/images/quick-widget.png" width="24%" alt="桌面快捷记录小组件">
+  <img src="docs/images/note-widget.png" width="38%" alt="实际 AppWidgetHost 渲染的天空笔记便签">
+  <img src="docs/images/quick-widget.png" width="20%" alt="桌面快捷记录小组件">
   <p><sub>笔记便签 · 快捷记录</sub></p>
   <p><sub>以上为公开版模拟器截图，使用自编示例内容。</sub></p>
 </div>
@@ -66,7 +66,7 @@
 | 本地备份 | 导出 JSON，导入时合并笔记、图片和关联信息 |
 | 分享输出 | PNG 五种图片主题、署名／日期／字号预览；PDF、TXT、复制文本与单篇 JSON |
 
-不包含云同步、账号系统、密码锁、广告或统计 SDK。记忆复习规则为本项目实现，不宣称与 iOS 原版算法一致。
+不包含云同步、账号系统、密码锁、广告或统计 SDK。
 
 ## 快速开始
 
@@ -80,45 +80,7 @@
 
 安装并打开应用后，在桌面双指捏合，进入「服务卡片」，滑到底部选择「窗口小工具」，找到灵感笔记。选择快捷记录，或添加笔记便签后指定内容和外观。长按小组件可在桌面支持时调整大小。
 
-这是兼容 APK 系统的 **Android 窗口小工具**。已在 Android 模拟器验证实际绑定、配置、刷新及尺寸调整，**尚未在鸿蒙 4.2 真机验证**，不宣称支持 HarmonyOS NEXT。不同桌面版本入口可能不同，详见[小组件使用与验证说明](docs/WIDGETS.md)。
-
-## 构建与测试
-
-需要 JDK 17、Android SDK Platform 35、Build Tools 35.0.0。Gradle Wrapper 使用 8.9，Android Gradle Plugin 使用 8.7.3。
-
-1. 克隆仓库并用 Android Studio 打开根目录。
-2. 配置 JDK 17 与 Android SDK。命令行用户可设置 `ANDROID_HOME`，或在未跟踪的 `local.properties` 中填写 `sdk.dir`。
-3. 构建和静态检查：
-
-```sh
-# macOS / Linux
-./gradlew assembleDebug lintDebug assembleDebugAndroidTest
-```
-
-```powershell
-# Windows PowerShell
-.\gradlew.bat assembleDebug lintDebug assembleDebugAndroidTest
-```
-
-首次构建会下载构建工具与依赖。若确有需要，可设置 `INOTE_MAVEN_MIRROR=1` 使用构建配置中的阿里云 Maven 镜像；默认使用 Google 和 Maven Central。
-
-输出 APK：`app/build/outputs/apk/debug/app-debug.apk`。公开版应用 ID 是 `com.oldjie.inote.community`，与自用实验版分开安装，不会直接读取其私有数据库。迁移请使用 JSON 备份。
-
-### 设备测试
-
-连接 Android 设备或模拟器后运行（多设备时在 `adb` 后加 `-s <序列号>`）：
-
-```sh
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.PersonalTestRunner
-```
-
-测试覆盖本地存储、富文本、备份合并与拒绝无效数据、图片生命周期、记忆卡片、导出以及界面基本操作。界面测试使用 Android 10+ 的窗口检查接口，请在 Android 10 或更新版本执行完整测试。测试数据会清理，但仍建议使用测试设备。
-
-验证范围包含本地数据、导出隐私边界、模板、富文本危险协议、实际小组件绑定、配置、调整大小与更新。每个版本的检查结果和已知差异见[更新记录](CHANGELOG.md)，不代表覆盖全部 Android 设备。
-
-0.3.0 验证记录：构建及 Android Lint 通过；Android 12 模拟器 **42 项设备测试全部通过**。小组件测试包含实际点击打开指定笔记、快捷记录输入保存，以及拒绝伪造入口。
+不同桌面版本入口可能不同，详见[小组件使用与验证说明](docs/WIDGETS.md)。
 
 ## 数据与隐私
 
@@ -130,7 +92,7 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 - 小组件将所选笔记摘要交给桌面程序显示；归档或移入回收站后会隐藏正文。
 - 自定义模板只保存文字与格式，目前不包含在笔记 JSON 备份中；有重要模板时请同时保留对应笔记。
 
-详见 [隐私说明](PRIVACY.md) 和 [安全说明](SECURITY.md)。这里的检查是源码审查与回归验证，不是独立第三方安全认证。
+详见 [隐私说明](PRIVACY.md) 和 [安全说明](SECURITY.md)。
 
 ## 与 iOS 原版文件的关系
 
