@@ -1,8 +1,24 @@
-# 灵感笔记 · Android
+<div align="center">
+  <h1>灵感笔记 · iNote Android</h1>
+  <p><strong>一款偏爱纸张质感的离线笔记应用。</strong></p>
+  <p>用多条小笔记串起一个主题，收纳文字、清单与图片，按自己的节奏整理与回顾。</p>
+  <p>
+    <a href="https://github.com/oldjie/inote-android/releases/latest">下载安装</a> ·
+    <a href="#界面预览">界面预览</a> ·
+    <a href="#功能特性">功能特性</a> ·
+    <a href="#快速开始">使用说明</a> ·
+    <a href="PRIVACY.md">隐私说明</a>
+  </p>
+  <p>
+    <a href="https://github.com/oldjie/inote-android/releases"><img src="https://img.shields.io/github/v/release/oldjie/inote-android?include_prereleases&amp;label=Release&amp;color=82745e" alt="最新版本"></a>
+    <img src="https://img.shields.io/badge/Android-8.0%2B-82745e" alt="Android 8.0+">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-82745e" alt="MIT License"></a>
+  </p>
+</div>
 
-**一款偏爱纸张质感的离线笔记应用（inote android 版非官方）。**
+## 关于灵感笔记
 
-用多条小笔记串起一个主题，把文字、清单和图片收进笔记本，再按自己的节奏整理与回顾。支持 Android 8.0 及以上，使用 Java 和 Android 原生界面实现。
+使用 Java 与 Android 原生界面实现，支持 Android 8.0 及以上。笔记、图片与草稿均保存在本机，无需账号或云同步。
 
 > 这是受 iOS iNote 使用方式启发的独立 Android 实现，与 iNote 原开发者无隶属、合作或授权关系，也不是其官方移植。公开版不包含原版 IPA、提取图标、封面、字体或模板；使用独立绘制的图标、封面与自编模板。0.3 版本依据实际界面截图进一步对齐布局，但不宣称逐像素相同。
 
@@ -12,26 +28,27 @@
 
 ## 界面预览
 
-以下为公开版模拟器截图，仅使用自编示例内容。
+<div align="center">
+  <img src="docs/images/home.png" width="29%" alt="纸张卡片笔记列表">
+  <img src="docs/images/editor.png" width="29%" alt="富文本与待办编辑">
+  <img src="docs/images/books.png" width="29%" alt="笔记本书架">
+  <p><sub>笔记首页 · 富文本编辑 · 笔记本书架</sub></p>
+  <img src="docs/images/detail.png" width="29%" alt="独立日期栏和横线小笔记">
+  <img src="docs/images/note-menu.png" width="29%" alt="底部笔记操作面板">
+  <img src="docs/images/export.png" width="29%" alt="图片主题与署名预览">
+  <p><sub>笔记详情 · 操作面板 · 图片导出</sub></p>
+</div>
 
-<p>
-  <img src="docs/images/home.png" width="30%" alt="纸张卡片笔记列表" />
-  <img src="docs/images/editor.png" width="30%" alt="富文本与待办编辑" />
-  <img src="docs/images/books.png" width="30%" alt="笔记本书架" />
-</p>
+### 桌面小组件
 
-<p>
-  <img src="docs/images/detail.png" width="30%" alt="独立日期栏和横线小笔记" />
-  <img src="docs/images/note-menu.png" width="30%" alt="底部笔记操作面板" />
-  <img src="docs/images/export.png" width="30%" alt="图片主题与署名预览" />
-</p>
+<div align="center">
+  <img src="docs/images/note-widget.png" width="46%" alt="实际 AppWidgetHost 渲染的天空笔记便签">
+  <img src="docs/images/quick-widget.png" width="24%" alt="桌面快捷记录小组件">
+  <p><sub>笔记便签 · 快捷记录</sub></p>
+  <p><sub>以上为公开版模拟器截图，使用自编示例内容。</sub></p>
+</div>
 
-<p>
-  <img src="docs/images/note-widget.png" width="60%" alt="实际 AppWidgetHost 渲染的天空笔记便签" />
-  <img src="docs/images/quick-widget.png" width="28%" alt="桌面快捷记录小组件" />
-</p>
-
-## 可以做什么
+## 功能特性
 
 | 功能 | 说明 |
 | --- | --- |
@@ -57,7 +74,7 @@
 
 **卸载前请导出备份。** 应用数据保存在本机私有目录，卸载会删除。备份导入采用合并方式，重复导入可能产生重复内容；导入前建议先备份现有数据。
 
-当前仓库提供源代码，不附带签名发布包。自行构建的 Debug APK 仅用于开发与个人测试。
+仓库提供源代码，公开体验 APK 可从 Releases 下载。自行构建的 Debug APK 仅用于开发与个人测试。
 
 ### 鸿蒙 4.2 桌面小组件
 
@@ -65,7 +82,7 @@
 
 这是兼容 APK 系统的 **Android 窗口小工具**。已在 Android 模拟器验证实际绑定、配置、刷新及尺寸调整，**尚未在鸿蒙 4.2 真机验证**，不宣称支持 HarmonyOS NEXT。不同桌面版本入口可能不同，详见[小组件使用与验证说明](docs/WIDGETS.md)。
 
-## 构建
+## 构建与测试
 
 需要 JDK 17、Android SDK Platform 35、Build Tools 35.0.0。Gradle Wrapper 使用 8.9，Android Gradle Plugin 使用 8.7.3。
 
@@ -123,6 +140,9 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 
 ## 源码导航
 
+<details>
+<summary>查看主要源码模块</summary>
+
 - `MainActivity.java`：主界面、编辑、笔记本与导入导出入口。
 - `NoteStore.java`：SQLite 数据模型、备份和图片生命周期。
 - `RichText.java` / `PaperChecks.java`：文本样式序列化与清单显示。
@@ -134,8 +154,16 @@ adb shell am instrument -w com.oldjie.inote.community.test/com.personal.inote.Pe
 - `CustomTemplateStore.java`：应用私有目录中的自定义模板。
 - `app/src/androidTest`：设备端回归测试，使用生成数据，不含原版安装包样本。
 
+</details>
+
 代码位于 `app/src/main/java/com/personal/inote`。欢迎提交问题与改进；问题报告请描述设备版本、复现步骤和期望行为，勿附真实笔记、密钥或未经脱敏的备份。
 
 ## 许可与声明
 
 本仓库的独立实现代码及自编示例素材采用 [MIT License](LICENSE)。该许可不授予任何第三方商标、原版应用或其素材的权利。iNote 名称仅用于说明项目来源与兼容目标。详见 [NOTICE](NOTICE.md)。
+
+---
+
+<div align="center">
+  <sub>灵感笔记 · 按自己的节奏记录与回顾。</sub>
+</div>
