@@ -45,7 +45,6 @@
   <img src="docs/images/note-widget.png" width="38%" alt="实际 AppWidgetHost 渲染的天空笔记便签">
   <img src="docs/images/quick-widget.png" width="20%" alt="桌面快捷记录小组件">
   <p><sub>笔记便签 · 快捷记录</sub></p>
-  <p><sub>以上为公开版模拟器截图，使用自编示例内容。</sub></p>
 </div>
 
 ## 功能特性
